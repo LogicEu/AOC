@@ -34,5 +34,5 @@ int main(int argc, char** argv)
     // Puzzle
 
     free(buf);
-    return EXIT_FAILURE;
+    return EXIT_SUCCESS;
 }

@@ -29,6 +29,7 @@ int main(int argc, char** argv)
     char* buf = file_read(argv[1]);
     if (!buf) {
         printf("Could not open file '%s'.\n", argv[1]);
+        return EXIT_FAILURE;
     }
 
     // Puzzle

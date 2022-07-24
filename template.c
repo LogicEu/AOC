@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 
-char* file_read(const char* filename)
+static char* file_read(const char* filename)
 {
     FILE* file = fopen(filename, "rb");
     if (!file) {

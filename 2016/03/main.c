@@ -20,6 +20,11 @@ static char* file_read(const char* filename)
     return buf;
 }
 
+static inline int triangle(const int a, const int b, const int c)
+{
+    return (a < b + c) && (b < a + c) && (c < a + b);
+}
+
 int main(int argc, char** argv)
 {
     if (argc < 2) {
@@ -35,6 +40,10 @@ int main(int argc, char** argv)
 
     // Puzzle
 
+    int t[3][3];
+    int a, b, c;
+    int count = 0, count2 = 0;
+
     long j = 0, linecount = 0;
     char str[128];
 
@@ -42,19 +51,41 @@ int main(int argc, char** argv)
         if (buf[i] == '\n') {
             str[j] = 0;
             j = 0;
-            printf("%s\n", str);
+
+            sscanf(str, "%d %d %d", &a, &b, &c);
+            count += triangle(a, b, c);
+
+            const int n = linecount % 3;
+            t[0][n] = a;
+            t[1][n] = b;
+            t[2][n] = c;
+
+            if (n == 2) {
+                for (int k = 0; k < 3; ++k) {
+                    count2 += triangle(t[k][0], t[k][1], t[k][2]);
+                }
+            }
+
             ++linecount;
         }
         else str[j++] = buf[i];
     }
 
-    if (j) {
-        str[j] = 0;
-        printf("%s\n", str);
-        ++linecount;
+    str[j] = 0;
+    sscanf(str, "%d %d %d", &a, &b, &c);
+    count += triangle(a, b, c);
+ 
+    const int n = linecount % 3;
+    t[0][n] = a;
+    t[1][n] = b;
+    t[2][n] = c;   
+    
+    for (int i = 0; i < 3; ++i) {
+        count2 += triangle(t[i][0], t[i][1], t[i][2]);
     }
 
-    printf("Lines: %ld\n", linecount);
+    printf("Puzzle 1: %d\n", count);
+    printf("Puzzle 2: %d\n", count2);
 
     free(buf);
     return EXIT_SUCCESS;

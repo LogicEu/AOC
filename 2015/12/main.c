@@ -22,57 +22,72 @@ static char* file_read(const char* filename)
 
 #define NUM(ch) (((ch >= '0') && (ch <= '9')) || (ch == '-'))
 
-long sum(const char* str) 
+static long sum(const char* buf) 
 {
     long count = 0;
-
     char numstr[8] = {0};
     for (long i = 0; buf[i]; ++i) {
         if (NUM(buf[i])) {
+            
             long nummark = i;
             while (NUM(buf[i])) {
                 ++i;
             }
+            
             memcpy(numstr, buf + nummark, i - nummark);
             numstr[i - nummark] = 0;
-            long num = (long)atoi(numstr);
-
-            count += num;
-
-            printf("%s - %ld\n", numstr, num);
+            count += (long)atoi(numstr);
+        
         }
     }
-
     return count;
 }
 
-long innersum(const char* str)
+static long innersum(const char* buf, const char c, long* i)
 {
-    static const char red[4] = "red";
-    int found = 0;
+    int red = 0;
+    long count = 0;
+    char numstr[8];
+    
+    for (; buf[*i]; ++(*i)) {
+    
+        const long n = *i; 
+        //printf("%c", buf[n]);
 
-    long acc = 0
-    long i = 0;
-    do {
-        acc += acc + (str[i] == '{') - (str[i] == '}');
-        if (memcpy(str + i, red, 3)) {
-            found = acc;
+        if (NUM(buf[n])) {
+            while(NUM(buf[*i])) {
+                ++(*i);
+                if (NUM(buf[*i])) {
+                    //printf("%c", buf[*i]);
+                }
+            }
+            
+            memcpy(numstr, buf + n, *i - n);
+            numstr[*i - n] = 0;
+            count += (long)atoi(numstr);
+
+            --(*i);
         }
-        ++i;
-    } while (acc && str[i]);
+        
+        else if (buf[n] == '{' || buf[n] == '[') {
+            ++(*i);
+            count += innersum(buf, buf[n], i);
+        }
+        
+        else if (buf[n] == '}' || buf[n] == ']') {
+            //++(*i);
+            break;
+        }
+        
+        else if (!memcmp(buf + n, "\"red\"", 5) && c == '{') {
+            //printf("red\"");
+            ++red;
+            *i += 4;
+        }
 
-    if (!found) {
-        return sum(str);
     }
-
-    i = 0;
-    long acc2 = 0;
-    do {
-        acc2 = acc2 + (str[i] == '{') - (str[i] == '}');
-        if (acc2 < found) {
-            ++i;
-        }
-    } while (acc2 && str[i]);
+    
+    return count * !red;
 }
 
 int main(int argc, char** argv)
@@ -94,43 +109,10 @@ int main(int argc, char** argv)
     printf("Puzzle 1: %ld\n", count);
 
     // Puzzle 2
-
-    count = 0;
-
-    char str[1024] = {0};
-    for (long i = 0; buf[i]; ++i) {
-        if (NUM(buf[i])) {
-            long nummark = i;
-            while (NUM(buf[i])) {
-                ++i;
-            }
-            memcpy(numstr, buf + nummark, i - nummark);
-            numstr[i - nummark] = 0;
-            long num = (long)atoi(numstr);
-
-            count += num;
-
-            printf("%s - %ld\n", numstr, num);
-        } else if (buf[i] == '{') {
-            
-            long j = 0;
-            long acc = 0;
-
-            do {
-                acc = acc + (buf[i] == '{') - (buf[i] == '}');
-                str[j++] = buf[i];
-                printf("%c", buf[i]);
-                ++i;
-            } while (acc && buf[i]);
-            printf("\n");
-            str[j] = 0;
-
-            count += innersum(str);
-        }
-    }
-
+    long i = 0;
+    count = innersum(buf, 0, &i);
+    //printf("\n");
     printf("Puzzle 2: %ld\n", count);
-
 
     free(buf);
     return EXIT_SUCCESS;

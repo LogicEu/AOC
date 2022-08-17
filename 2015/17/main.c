@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdint.h>
 
 static char* file_read(const char* filename)
 {
@@ -22,49 +21,75 @@ static char* file_read(const char* filename)
 
 #define NUM_COUNT 20
 
-static long count_combinations(const int* array)
+static int count_combinations(const int* array)
 {
     int i, j, r;
     unsigned char* bytes = (unsigned char*)&r;
     
     int bools[24] = {0};
-    long count = 0;
+    int count = 0;
 
-    for (r = 0; !((bytes[2] >> 5) & 1); ++r) {
+    for (r = 0; !((bytes[2] >> 4) & 1); ++r) {
         for (i = 2; i >= 0; --i) {
             for (j = 7; j >= 0; --j) {
-                unsigned char bit = (bytes[i] >> j) & 1;
-                bools[i * 8 + j] = (int)bit;
+                bools[i * 8 + j] = (int)((bytes[i] >> j) & 1);
             }
         }  
 
-        long acc = 0;
+        int acc = 0;
         for (i = 0; i < NUM_COUNT; ++i) {
             acc += array[i] * bools[i];
         }
 
         if (acc == 150) {
             ++count;
-
-            for (i = 0; i < NUM_COUNT; ++i) {
-                printf("%d ", array[i]);
-            }
-            printf("\n");
-
-            for (i = 0; i < NUM_COUNT; ++i) {
-                printf("%d ", bools[i]);
-            }
-            printf("\n");
-
-            for (i = 0; i < NUM_COUNT; ++i) {
-                printf("%d ", bools[i] * array[i]);
-            }
-            printf("\n----------------------------------------------\n");
         }
     }
 
     return count;
 }
+
+static int count_combinations_min(const int* array)
+{
+    int i, j, r;
+    unsigned char* bytes = (unsigned char*)&r;
+
+    int min = 99999999;
+    
+    int bools[24] = {0};
+    int count = 0;
+
+    for (r = 0; !((bytes[2] >> 4) & 1); ++r) {
+        int bits = 0;
+        for (i = 2; i >= 0; --i) {
+            for (j = 7; j >= 0; --j) {
+                int n = (bytes[i] >> j) & 1;
+                bits += n;
+                bools[i * 8 + j] = n;
+            }
+        }  
+
+        if (bits > min) {
+            continue;
+        }
+
+        int acc = 0;
+        for (i = 0; i < NUM_COUNT; ++i) {
+            acc += array[i] * bools[i];
+        }
+
+        if (acc == 150) {
+            if (bits < min) {
+                count = 1;
+                min = bits;
+            }
+            else ++count;
+        }
+    }
+
+    return count;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -82,8 +107,6 @@ int main(int argc, char** argv)
     // Puzzle
     
     int arr[NUM_COUNT];
-    int arrcount = 0;
-
     char str[16];
     long j = 0, linecount = 0;
     
@@ -91,32 +114,19 @@ int main(int argc, char** argv)
         if (buf[i] == '\n') {
             str[j] = 0;
             j = 0;
-
-            arr[arrcount] = atoi(str);
-            printf("%ld.- '%d'\n",  linecount, arr[arrcount]);
-
-            ++arrcount;
-            ++linecount;
-            
-            memset(str, 0, 16);
+            arr[linecount++] = atoi(str);
         }
         else str[j++] = buf[i];
     }
 
     str[j] = 0;
-    j = 0;
-    arr[arrcount] = atoi(str);
-    printf("%ld.- '%d'\n", linecount, arr[arrcount]);
-
-    ++arrcount;
-    ++linecount;
-
-    for (int i = 0; i < arrcount; ++i) {
-        printf("%d\n", arr[i]);
-    }
+    arr[linecount++] = atoi(str);
 
     long count = count_combinations(arr);
     printf("Puzzle 1: %ld\n", count);
+
+    count = count_combinations_min(arr);
+    printf("Puzzle 2: %ld\n", count);
 
     free(buf);
     return EXIT_SUCCESS;

@@ -20,11 +20,27 @@ static char* file_read(const char* filename)
     return buf;
 }
 
-#define STRLEN 128
+#define STRLEN 1024
 
-static void puzzle(const char* str, const long line)
+static size_t puzzle(const char* str)
 {
-    printf("%ld.- '%s'\n", line, str);
+    const size_t size = strlen(str);
+    size_t count = 0;
+    for (size_t i = 0; i < size; ++i) {
+        count += ((str[i]) == (str[(i + 1) % size])) * (str[i] - '0');
+    }
+    return count;
+}
+
+static size_t puzzle2(const char* str)
+{
+    const size_t size = strlen(str);
+    const size_t hsize = size / 2;
+    size_t count = 0;
+    for (size_t i = 0; i < size; ++i) {
+        count += ((str[i]) == (str[(i + hsize) % size])) * (str[i] - '0');
+    }
+    return count;
 }
 
 int main(const int argc, const char** argv)
@@ -40,29 +56,8 @@ int main(const int argc, const char** argv)
         return EXIT_FAILURE;
     }
 
-    long j = 0, linecount = 0;
-    char str[STRLEN];
-
-    for (long i = 0; buf[i]; ++i) {
-        if (buf[i] == '\n') {
-            str[j] = 0;
-            j = 0;
-            puzzle(str, linecount++);
-        }
-        else str[j++] = buf[i];
-
-        if (j > STRLEN) {
-            printf("Error: string buffer is too small!\n");
-            return EXIT_FAILURE;
-        }       
-    }
-
-    if (j) {
-        str[j] = 0;
-        puzzle(str, linecount++);
-    }
-
-    printf("Line count: %ld\n", linecount);
+    printf("Puzzle 1: %ld\n", puzzle(buf));
+    printf("Puzzle 2: %ld\n", puzzle2(buf)); 
 
     free(buf);
     return EXIT_SUCCESS;

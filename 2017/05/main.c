@@ -22,11 +22,6 @@ static char* file_read(const char* filename)
 
 #define STRLEN 128
 
-static void puzzle(const char* str, const long line)
-{
-    printf("%ld.- '%s'\n", line, str);
-}
-
 int main(const int argc, const char** argv)
 {
     if (argc < 2) {
@@ -43,11 +38,14 @@ int main(const int argc, const char** argv)
     long j = 0, linecount = 0;
     char str[STRLEN];
 
+    int arr[0xfff] = {0}, arr2[0xfff];
+
     for (long i = 0; buf[i]; ++i) {
         if (buf[i] == '\n') {
             str[j] = 0;
             j = 0;
-            puzzle(str, linecount++);
+            arr[linecount] = atoi(str);
+            arr2[linecount++] = atoi(str);
         }
         else str[j++] = buf[i];
 
@@ -59,10 +57,22 @@ int main(const int argc, const char** argv)
 
     if (j) {
         str[j] = 0;
-        puzzle(str, linecount++);
+        arr[linecount] = atoi(str);
+        arr2[linecount++] = atoi(str);
     }
 
-    printf("Line count: %ld\n", linecount);
+    int k, steps = 0;
+    for (int i = 0; i >= 0 && i < linecount; i += k, ++steps) {
+        k = arr[i]++;
+    } 
+    printf("Puzzle 1: %d\n", steps);
+
+    steps = 0;
+    for (int i = 0; i >= 0 && i < linecount; i += k, ++steps) {
+        k = arr2[i];
+        arr2[i] += (arr2[i] >= 3) ? -1 : 1;
+    } 
+    printf("Puzzle 2: %d\n", steps);
 
     free(buf);
     return EXIT_SUCCESS;

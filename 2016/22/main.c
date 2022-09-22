@@ -21,10 +21,43 @@ static char* file_read(const char* filename)
 }
 
 #define STRLEN 128
+#define WIDTH 37
+#define HEIGHT 25
 
-static void puzzle(const char* str, const long line)
+typedef struct dir_t {
+    int size;
+    int used;
+    int avail;
+    int use;
+} dir_t;
+
+static dir_t grid[WIDTH * HEIGHT];
+static int posx = 0;
+static int posy = 0;
+
+static void catch(const char* str)
 {
-    printf("%ld.- '%s'\n", line, str);
+    dir_t d;
+    int x, y;
+    sscanf(str, "/dev/grid/node-x%d-y%d %dT %dT %dT %d%%", 
+            &x, &y, &d.size, &d.used, &d.avail, &d.use);
+    //printf("/dev/grid/node-x%d-y%d\t%dT\t%dT\t%dT\t%d%%\n",
+    //        x, y, d.size, d.used, d.avail, d.use);
+    grid[x * HEIGHT + y] = d;
+}
+
+static int puzzle1(void)
+{
+    int paircount = 0;
+    const int size = WIDTH * HEIGHT;
+    for (int i = 0; i < size; ++i) {
+        if (grid[i].used) {
+            for (int j = 0; j < size; ++j) {
+                paircount += (i != j && grid[i].used <= grid[j].avail);
+            }
+        }
+    }
+    return paircount;
 }
 
 int main(const int argc, const char** argv)
@@ -47,22 +80,20 @@ int main(const int argc, const char** argv)
         if (buf[i] == '\n') {
             str[j] = 0;
             j = 0;
-            puzzle(str, linecount++);
+            if (linecount > 1) {
+                catch(str);
+            }
+            ++linecount;
         }
         else str[j++] = buf[i];
-
-        if (j > STRLEN) {
-            printf("Error: string buffer is too small!\n");
-            return EXIT_FAILURE;
-        }       
     }
 
     if (j) {
         str[j] = 0;
-        puzzle(str, linecount++);
+        catch(str);
     }
 
-    printf("Line count: %ld\n", linecount);
+    printf("Puzzle 1: %d\n", puzzle1());
 
     free(buf);
     return EXIT_SUCCESS;

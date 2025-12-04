@@ -22,10 +22,24 @@ static char* file_read(const char* filename)
 }
 
 #define STRLEN 128
+#define DIST(a, b) (((a) < (b)) ? ((b) - (a)) : ((a) - (b)))
 
-static void puzzle(const char* str, const long line)
+static void puzzle(const char* str, const long line, long* nums1, long* nums2)
 {
-    printf("%ld.- '%s'\n", line, str);
+    sscanf(str, "%ld %ld", nums1 + line, nums2 + line);
+}
+
+static void sort(long* nums, const long size)
+{
+    for (long i = 0; i < size - 1; ++i) {
+        for (long j = 0; j < size - i - 1; ++j) {
+            if (nums[j] > nums[j + 1]) {
+                long n = nums[j];
+                nums[j] = nums[j + 1];
+                nums[j + 1] = n;
+            }
+        }
+    }
 }
 
 int main(const int argc, const char** argv)
@@ -43,12 +57,13 @@ int main(const int argc, const char** argv)
 
     long j = 0, linecount = 0;
     char str[STRLEN];
+    long nums1[1000], nums2[1000];
 
     for (long i = 0; buf[i]; ++i) {
         if (buf[i] == '\n') {
             str[j] = 0;
             j = 0;
-            puzzle(str, linecount++);
+            puzzle(str, linecount++, nums1, nums2);
         }
         else str[j++] = buf[i];
 
@@ -60,10 +75,26 @@ int main(const int argc, const char** argv)
 
     if (j) {
         str[j] = 0;
-        puzzle(str, linecount++);
+        puzzle(str, linecount++, nums1, nums2);
     }
 
-    printf("Line count: %ld\n", linecount);
+    sort(nums1, linecount);
+    sort(nums2, linecount);
+
+    long dist = 0, score = 0;
+    for (long i = 0; i < linecount; ++i) {
+        long d = DIST(nums1[i], nums2[i]), n = 0;
+        dist += d;
+
+        for (long j = 0; j < linecount; ++j) {
+            n += nums1[i] == nums2[j];
+        }
+        
+        score += nums1[i] * n;
+    }
+
+    printf("puzzle 1: %ld\n", dist);
+    printf("puzzle 2; %ld\n", score);
 
     free(buf);
     return EXIT_SUCCESS;

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-#include <ctype.h>
 
 static char* file_read(const char* filename)
 {
@@ -23,10 +22,46 @@ static char* file_read(const char* filename)
 
 #define STRLEN 128
 
-static void puzzle(const char* str, const long line)
+static long strcntchr(const char* str, int c)
 {
-    printf("%ld.- '%s'\n", line, str);
+    long count = 0;
+    while (*str) {
+        count += *str == c;
+        ++str;
+    }
+    return count;
 }
+
+static long puzzle(char* str)
+{
+    int n, m, r;
+    char c, *colon = strchr(str, ':');
+    *colon = 0;
+
+    sscanf(str, "%d-%d %c", &n, &m, &c);
+    printf("%d-%d %c\n", n, m, c);
+
+    *colon = ':';
+    r = strcntchr(++colon, c);
+    return (r >= n && r <= m);
+}
+
+static long puzzle2(char* str)
+{
+    int n, m;
+    char c, *colon = strchr(str, ':');
+    *colon = 0;
+
+    sscanf(str, "%d-%d %c", &n, &m, &c);
+    printf("%d-%d %c\n", n, m, c);
+
+    --n;
+    --m;
+    *colon = ':';
+    colon += 2;
+    return (colon[n] == c && colon[m] != c) || (colon[n] != c && colon[m] == c);
+}
+
 
 int main(const int argc, const char** argv)
 {
@@ -41,14 +76,15 @@ int main(const int argc, const char** argv)
         return EXIT_FAILURE;
     }
 
-    long j = 0, linecount = 0;
+    long j = 0, count = 0, count2 = 0;
     char str[STRLEN];
 
     for (long i = 0; buf[i]; ++i) {
         if (buf[i] == '\n') {
             str[j] = 0;
             j = 0;
-            puzzle(str, linecount++);
+            count += puzzle(str);
+            count2 += puzzle2(str);
         }
         else str[j++] = buf[i];
 
@@ -60,10 +96,12 @@ int main(const int argc, const char** argv)
 
     if (j) {
         str[j] = 0;
-        puzzle(str, linecount++);
+        count += puzzle(str);
+        count2 += puzzle2(str);
     }
 
-    printf("Line count: %ld\n", linecount);
+    printf("Puzzle 1: %ld\n", count);
+    printf("Puzzle 2: %ld\n", count2);
 
     free(buf);
     return EXIT_SUCCESS;

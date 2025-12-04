@@ -21,16 +21,14 @@ static char* file_read(const char* filename)
 }
 
 #define STRLEN 256
+#define swap(a, b, type) do { type tmp = a; a = b; b = tmp; } while (0)
 
 static void reverse(int* array, const int from, const int len)
 {
-    int buf[STRLEN];
-    for (int i = 0; i < len; ++i) {
-        buf[i] = array[(from + i) % STRLEN];
-    }
-
-    for (int i = 0; i < len; ++i) {
-        array[(from + i) % STRLEN] = buf[len - i - 1];
+    for (int i = 0; i < len / 2; ++i) {
+        int n = (from + i) % STRLEN;
+        int m = (from + len - i - 1) % STRLEN;
+        swap(array[n], array[m], int);
     }
 }
 

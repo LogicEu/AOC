@@ -21,13 +21,6 @@ static char* file_read(const char* filename)
     return buf;
 }
 
-#define STRLEN 128
-
-static void puzzle(const char* str, const long line)
-{
-    printf("%ld.- '%s'\n", line, str);
-}
-
 int main(const int argc, const char** argv)
 {
     if (argc < 2) {
@@ -41,30 +34,8 @@ int main(const int argc, const char** argv)
         return EXIT_FAILURE;
     }
 
-    long j = 0, linecount = 0;
-    char str[STRLEN];
-
-    for (long i = 0; buf[i]; ++i) {
-        if (buf[i] == '\n') {
-            str[j] = 0;
-            j = 0;
-            puzzle(str, linecount++);
-        }
-        else str[j++] = buf[i];
-
-        if (j > STRLEN) {
-            printf("Error: string buffer is too small!\n");
-            return EXIT_FAILURE;
-        }       
-    }
-
-    if (j) {
-        str[j] = 0;
-        puzzle(str, linecount++);
-    }
-
-    printf("Line count: %ld\n", linecount);
-
+    printf("'%s'\n", buf);
     free(buf);
+
     return EXIT_SUCCESS;
 }

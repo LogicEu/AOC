@@ -23,9 +23,30 @@ static char* file_read(const char* filename)
 
 #define STRLEN 128
 
-static void puzzle(const char* str, const long line)
+static long puzzle(char* str, const long line)
 {
-    printf("%ld.- '%s'\n", line, str);
+    long divider = 0, count = 0, wincount = 0, winning[32];
+    while (*str != ':') ++str;
+    ++str;
+
+    char* tok = strtok(str, " ");
+    while (tok) {
+        if (divider) {
+            int n = atoi(tok);
+            for (int i = 0; i < wincount; ++i) {
+                if (n == winning[i]) {
+                    count = count == 0 ? 1 : count * 2;
+                }
+            }
+        } else if (tok[0] == '|') {
+            ++divider;
+        } else {
+            winning[wincount++] = atoi(tok);
+        }
+
+        tok = strtok(NULL, " ");
+    }
+    return count;
 }
 
 int main(const int argc, const char** argv)
@@ -41,14 +62,14 @@ int main(const int argc, const char** argv)
         return EXIT_FAILURE;
     }
 
-    long j = 0, linecount = 0;
+    long j = 0, count = 0, linecount = 0;
     char str[STRLEN];
 
     for (long i = 0; buf[i]; ++i) {
         if (buf[i] == '\n') {
             str[j] = 0;
             j = 0;
-            puzzle(str, linecount++);
+            count += puzzle(str, linecount++);
         }
         else str[j++] = buf[i];
 
@@ -60,11 +81,10 @@ int main(const int argc, const char** argv)
 
     if (j) {
         str[j] = 0;
-        puzzle(str, linecount++);
+        count += puzzle(str, linecount++);
     }
 
-    printf("Line count: %ld\n", linecount);
-
+    printf("Puzzle 1: %ld\n", count);
     free(buf);
     return EXIT_SUCCESS;
 }

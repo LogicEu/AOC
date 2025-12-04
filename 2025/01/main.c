@@ -23,9 +23,22 @@ static char* file_read(const char* filename)
 
 #define STRLEN 128
 
-static void puzzle(const char* str, const long line)
+static long calc(long* num, const char* str)
 {
-    printf("%ld.- '%s'\n", line, str);
+    long sign = str[0] == 'R' ? 1 : -1;
+    long n = atol(str + 1), count = 0;
+    while (n--) {
+        *num += sign;
+        if (*num < 0) {
+            *num = 99;
+        } else if (*num > 99) {
+            *num = 0;
+        }
+        count += !*num;
+    }
+
+    //printf("%ld\n", *num);
+    return count;
 }
 
 int main(const int argc, const char** argv)
@@ -41,6 +54,7 @@ int main(const int argc, const char** argv)
         return EXIT_FAILURE;
     }
 
+    long n, num = 50, count = 0, count2 = 0;
     long j = 0, linecount = 0;
     char str[STRLEN];
 
@@ -48,7 +62,8 @@ int main(const int argc, const char** argv)
         if (buf[i] == '\n') {
             str[j] = 0;
             j = 0;
-            puzzle(str, linecount++);
+            count2 += calc(&num, str);
+            count += !num;
         }
         else str[j++] = buf[i];
 
@@ -60,10 +75,12 @@ int main(const int argc, const char** argv)
 
     if (j) {
         str[j] = 0;
-        puzzle(str, linecount++);
+        count2 += calc(&num, str);
+        count += !num;
     }
 
-    printf("Line count: %ld\n", linecount);
+    printf("puzzle 1: %ld\n", count);
+    printf("puzzle 2: %ld\n", count2);
 
     free(buf);
     return EXIT_SUCCESS;
